@@ -11,19 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. Загружаем код
+
       - uses: actions/checkout@v4
 
-      # 2. Собираем образ (добавляем --rm для автоматической очистки)
+
       - name: Build Docker image
         run: |
           docker build --rm -t my-app .
 
-      # 3. Запускаем контейнер и проверяем
+
       - name: Test Flask app
         run: |
           docker run -d --rm -p 5000:5000 --name flask-container my-app
-          sleep 10  # Увеличили время ожидания
-          docker ps  # Проверяем запущенные контейнеры
+          sleep 10  
+          docker ps  
           curl -v http://localhost:5000 || echo "Тест не прошёл"
-          docker logs flask-container  # Выводим логи для отладки
+          docker logs flask-container
