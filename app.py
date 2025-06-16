@@ -1,10 +1,10 @@
-from flask import Flask  # Импортируем Flask
+from flask import Flask
 
-app = Flask(__name__)  # Создаём приложение
+app = Flask(__name__)
 
-@app.route("/")  # Говорим: "При запросе главной страницы делай следующее"
+@app.route("/")
 def hello():
-    return "Привет! Это мой первый сайт!"  # Выводим текст
+    return "Привет! Это мой первый сайт!"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")  # Запускаем сервер
+    app.run(host="0.0.0.0")
