@@ -9,23 +9,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
+    - name: Copy files to server
+      run: |
+        rsync -avz --delete ./ root@${{ secrets.SERVER_IP }}:/root/myapp/
 
-      - name: Build Docker image
-        run: |
-          docker build --rm -t my-app .
-
-
-      - name: Test Flask app
-        run: |
-          docker run -d --rm -p 5000:5000 --name flask-container my-app
-          sleep 10  
-          docker ps  
-          curl -v http://localhost:5000 || echo "Тест не прошёл"
-          docker logs flask-container
+    - name: Deploy on server
+      run: |
+        ssh root@${{ secrets.SERVER_IP }} << 'EOF'
+          cd /root/myapp
+          docker stop flask-container || true
+          docker rm flask-container || true
+          docker build -t my-app .
+          docker run -d --name flask-container -p 5000:5000 my-app
+        EOF
